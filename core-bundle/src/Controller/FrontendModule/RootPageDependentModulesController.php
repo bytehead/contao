@@ -21,8 +21,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RootPageDependentModulesController extends AbstractFrontendModuleController
 {
-    public function getResponse(Template $template, ModuleModel $model, Request $request): Response
+    public function __invoke(Request $request, ModuleModel $model, string $section, array $classes = null): Response
     {
+        if ($this->container->get('contao.routing.scope_matcher')->isBackendRequest($request)) {
+            return $this->getBackendWildcard($model);
+        }
+
         if (!$pageModel = $this->getPageModel()) {
             return new Response('');
         }
@@ -36,6 +40,13 @@ class RootPageDependentModulesController extends AbstractFrontendModuleControlle
         $controller = $this->container->get('contao.framework')->getAdapter(Controller::class);
         $content = $controller->getFrontendModule($modules[$pageModel->rootId]);
 
+        $this->tagResponse($model);
+
         return new Response($content);
+    }
+
+    public function getResponse(Template $template, ModuleModel $model, Request $request): Response
+    {
+        throw new \LogicException('This method should never be called');
     }
 }
