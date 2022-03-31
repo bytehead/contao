@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Contao\CoreBundle\Security\Logout;
 
+use Contao\CoreBundle\Framework\ContaoFramework;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -26,11 +28,16 @@ class LogoutHandler implements LogoutHandlerInterface
 {
     use TargetPathTrait;
 
+    private ContaoFramework $framework;
+    private ?LoggerInterface $logger;
+
     /**
      * @internal Do not inherit from this class; decorate the "contao.security.logout_handler" service instead
      */
-    public function __construct()
+    public function __construct(ContaoFramework $framework, LoggerInterface $logger = null)
     {
+        $this->framework = $framework;
+        $this->logger = $logger;
     }
 
     public function logout(Request $request, ?Response $response, TokenInterface $token): void
